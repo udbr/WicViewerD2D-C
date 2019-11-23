@@ -1,0 +1,17 @@
+#include "resource.h"
+#include "windows.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINMENU MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open...",                       IDM_FILE
+        MENUITEM "E&xit",                          IDM_EXIT
+    END
+END
+
