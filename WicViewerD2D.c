@@ -9,7 +9,7 @@
 #include "WICViewerD2D.h"
 
 typedef struct {
-	HINSTANCE               m_hInst;
+    HINSTANCE               m_hInst;
     IWICImagingFactory     *m_pIWICFactory;
     ID2D1Factory           *m_pD2DFactory;
     ID2D1HwndRenderTarget  *m_pRT;
@@ -56,7 +56,7 @@ HRESULT CreateDeviceResources(HWND hWnd)
 {
     HRESULT hr = S_OK;
 
-	Factory *factory = GetFactoryPtr(hWnd);
+    Factory *factory = GetFactoryPtr(hWnd);
 
     if (!factory->m_pRT)
     {
@@ -81,7 +81,7 @@ HRESULT CreateDeviceResources(HWND hWnd)
             renderTargetProperties.dpiY = DEFAULT_DPI;
 
             D2D1_SIZE_U size = { rc.right - rc.left, rc.bottom - rc.top };
-			D2D1_HWND_RENDER_TARGET_PROPERTIES hwndRenderTargetProperties = { hWnd, size, D2D1_PRESENT_OPTIONS_NONE };
+	    D2D1_HWND_RENDER_TARGET_PROPERTIES hwndRenderTargetProperties = { hWnd, size, D2D1_PRESENT_OPTIONS_NONE };
             hr = ID2D1Factory_CreateHwndRenderTarget(
 				factory->m_pD2DFactory,
 				&renderTargetProperties,
@@ -104,7 +104,7 @@ HRESULT CreateD2DBitmapFromFile(HWND hWnd)
     {
         // Step 2: Decode the source image
 
-		Factory *factory = GetFactoryPtr(hWnd);
+	Factory *factory = GetFactoryPtr(hWnd);
 		
         // Create a decoder
         IWICBitmapDecoder *pDecoder = NULL;
@@ -130,10 +130,10 @@ HRESULT CreateD2DBitmapFromFile(HWND hWnd)
         if (SUCCEEDED(hr))
         {
             if (factory->m_pConvertedSourceBitmap)
-			{
+	    {
             	IWICFormatConverter_Release(factory->m_pConvertedSourceBitmap);
             	factory->m_pConvertedSourceBitmap = NULL;
-			}
+	    }
             hr = IWICImagingFactory_CreateFormatConverter(factory->m_pIWICFactory,&(factory)->m_pConvertedSourceBitmap);
         }
 
@@ -147,7 +147,7 @@ HRESULT CreateD2DBitmapFromFile(HWND hWnd)
             	NULL,
             	0.f,
             	WICBitmapPaletteTypeCustom
-				);
+		);
         }
 
         //Step 4: Create render target and D2D bitmap from IWICBitmapSource
@@ -160,10 +160,10 @@ HRESULT CreateD2DBitmapFromFile(HWND hWnd)
         {
             // Need to release the previous D2DBitmap if there is one
             if (factory->m_pD2DBitmap)
-			{
-				ID2D1Bitmap_Release(factory->m_pD2DBitmap);
+	    {
+		ID2D1Bitmap_Release(factory->m_pD2DBitmap);
             	factory->m_pD2DBitmap = NULL;
-			}
+	    }
             
             hr = ID2D1DCRenderTarget_CreateBitmapFromWicBitmap(
 				factory->m_pRT,
@@ -185,7 +185,7 @@ LRESULT OnPaint(HWND hWnd)
     HRESULT hr = S_OK;
     PAINTSTRUCT ps;
 
-	Factory *factory = GetFactoryPtr(hWnd);
+    Factory *factory = GetFactoryPtr(hWnd);
 
     if (BeginPaint(hWnd, &ps))
     {
@@ -198,44 +198,44 @@ LRESULT OnPaint(HWND hWnd)
         {
             ID2D1HwndRenderTarget_BeginDraw(factory->m_pRT);
 
-			D2D1_MATRIX_3X2_F identity = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
+	    D2D1_MATRIX_3X2_F identity = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
             ID2D1DCRenderTarget_SetTransform(factory->m_pRT, &identity);
 
             // Clear the background
             D2D1_COLOR_F white = { 1.0f, 1.0f, 1.0f, 1.0f };
             ID2D1HwndRenderTarget_Clear(factory->m_pRT, &white);
 
-			// Fix for GetSize() returning wrong data
-			intptr_t *real_rtSize;
-			// Fix for GetSize() messing m_pRT Vtbl addr on x86_64
-			const ID2D1HwndRenderTargetVtbl *m_pRTVtbl;
-			m_pRTVtbl = factory->m_pRT->lpVtbl;
+	    // Fix for GetSize() returning wrong data
+	    intptr_t *real_rtSize;
+	    // Fix for GetSize() messing m_pRT Vtbl addr on x86_64
+	    const ID2D1HwndRenderTargetVtbl *m_pRTVtbl;
+	    m_pRTVtbl = factory->m_pRT->lpVtbl;
 			
 			
-			/* temporary workaround for change in gcc 9.x */
-		#if __GNUC__ < 9
-			D2D1_SIZE_F rtSize = ID2D1HwndRenderTarget_GetSize(factory->m_pRT);
-		#else
-			D2D1_SIZE_F rtSize;
-			asm("mov -0x10(%rbp),%rax");
-			asm("mov 0x18(%rax),%rax");
-   			asm("mov (%rax),%rax");
-   			asm("mov 0x1a8(%rax),%rax");
-   			asm("mov -0x10(%rbp),%rdx");
-   			asm("mov 0x18(%rdx),%rdx");
-   			asm("mov %rdx,%rcx");
-   			asm("callq *%rax");
-   			asm("mov %rax,-0xb0(%rbp)");
-   		#endif
+	    /* temporary workaround for change in gcc 9.x */
+	#if __GNUC__ < 9
+	    D2D1_SIZE_F rtSize = ID2D1HwndRenderTarget_GetSize(factory->m_pRT);
+	#else
+	    D2D1_SIZE_F rtSize;
+	    asm("mov -0x10(%rbp),%rax");
+	    asm("mov 0x18(%rax),%rax");
+   	    asm("mov (%rax),%rax");
+   	    asm("mov 0x1a8(%rax),%rax");
+   	    asm("mov -0x10(%rbp),%rdx");
+   	    asm("mov 0x18(%rdx),%rdx");
+   	    asm("mov %rdx,%rcx");
+   	    asm("callq *%rax");
+   	    asm("mov %rax,-0xb0(%rbp)");
+   	#endif
 			
-			// rtSize.width contain real rtSize addr - copy addr to *real_rtSize
-			// then write the contents of real_rtSize back to rtSize
-			memcpy(&real_rtSize,(intptr_t *)&rtSize.width,sizeof(intptr_t));
-			memcpy(&rtSize, real_rtSize, sizeof(D2D1_SIZE_F));
-			// GetSize() messes m_pRT addr on x86_64, so we restore it
-			factory->m_pRT->lpVtbl = m_pRTVtbl;
+	    // rtSize.width contain real rtSize addr - copy addr to *real_rtSize
+	    // then write the contents of real_rtSize back to rtSize
+	    memcpy(&real_rtSize,(intptr_t *)&rtSize.width,sizeof(intptr_t));
+	    memcpy(&rtSize, real_rtSize, sizeof(D2D1_SIZE_F));
+	    // GetSize() messes m_pRT addr on x86_64, so we restore it
+	    factory->m_pRT->lpVtbl = m_pRTVtbl;
 			
-			D2D1_RECT_F rectangle = { 0.0f, 0.0f, rtSize.width, rtSize.height };
+	    D2D1_RECT_F rectangle = { 0.0f, 0.0f, rtSize.width, rtSize.height };
 			
             // D2DBitmap may have been released due to device loss. 
             // If so, re-create it from the source bitmap
@@ -308,7 +308,7 @@ LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         case WM_SIZE:
         {
-        	Factory *factory = GetFactoryPtr(hWnd);
+            Factory *factory = GetFactoryPtr(hWnd);
         	
             D2D1_SIZE_U size = { LOWORD(lParam), HIWORD(lParam) };
 
@@ -372,7 +372,7 @@ static LRESULT CALLBACK s_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
     UNREFERENCED_PARAMETER(nCmdShow);
     
@@ -428,43 +428,43 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     		{
         		// Create window
         		HWND hWnd = CreateWindow(
-            	L"WICViewerD2D",
-            	L"WIC Viewer D2D Sample",
-            	WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-            	CW_USEDEFAULT,
-            	CW_USEDEFAULT,
-            	640,
-            	480,
-            	NULL,
-            	NULL,
-            	hInstance,
-            	&factory
-            	);
+            			L"WICViewerD2D",
+            			L"WIC Viewer D2D Sample",
+            			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+            			CW_USEDEFAULT,
+            			CW_USEDEFAULT,
+            			640,
+            			480,
+            			NULL,
+            			NULL,
+            			hInstance,
+            			&factory
+            		);
 
         		hr = hWnd ? S_OK : E_FAIL;
     		}
     		
     		if (SUCCEEDED(hr))
-            {
-                BOOL fRet;
-                MSG msg;
-
-                // Main message loop:
-                while ((fRet = GetMessage(&msg, NULL, 0, 0)) != 0)
                 {
-                    if (fRet == -1)
-                    {
+                	BOOL fRet;
+                	MSG msg;
+
+                	// Main message loop:
+                	while ((fRet = GetMessage(&msg, NULL, 0, 0)) != 0)
+                	{
+                    		if (fRet == -1)
+                    	{
                         break;
-                    }
-                    else
-                    {
+                }
+                else
+                {
                         TranslateMessage(&msg);
                         DispatchMessage(&msg);
-                    }
+                }
                 }
             }
-		}
-		CoUninitialize();
 	}
+	CoUninitialize();
+    }
     return 0;
 }
